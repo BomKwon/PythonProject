@@ -35,17 +35,18 @@ def func_open():                        # 파일 열기
 
 def func_save():                        # 파일 저장
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    if photo2 == None:      # 작업한 이미지 또는 불러온 이미지가 없으면
-        return              # 종료
-    # R -읽기, W -쓰기, W+ -추가
-    # defaultextension (확장자 생략 시, 기본 적용 확장자)
-    saveFp = asksaveasfile(parent=window, mode="w", defaultextension=".jpg", filetypes=(
-        ("JPG 파일", "*.jpg;*.jpeg"),
-        ("모든 파일", "*.*")
-    ))
+    if photo2 == None: #작업한 이미지 또는 불러온 이미지가 없으면
+        return #종료
+    #R-읽기, W-쓰기, W+-추가
+    #defaultextension (확장자 생략시 기본 적용 확장자)
+    saveFp = asksaveasfile(parent=window, mode="w", defaultextension=".jpg",
+                               filetypes=(
+                                   ("JPG 파일", "*.jpg;*.jpeg"),
+                                   ("모든 파일", "*.*")
+                                ))
     photo2.save(saveFp.name)
 
-def func_close():                       # 윈도우 종료
+def func_close():  # 윈도우 종료
     window.quit()
     window.destroy()
 
@@ -54,77 +55,120 @@ def displayImage(img, width, height):   # 윈도우 창에 이미지 출력
     # 이미지 크기에 맞게 윈도우 창 크기를 변경
     window.geometry(str(width) + "x" + str(height))
     if canvas != None:      # 유효성 검사(기존에 작업한 내용이 있으면 초기화)
-        canvas.destroy()    # 작업지 삭제
+        canvas.destroy() #delete("all")   # 작업지 삭제
 
-    canvas = Canvas(window, width=width, height=height)    # 작업지를 윈도우에 적용
+    canvas = Canvas(window, width=width, height=height, bg="yellow")    # 작업지를 윈도우에 적용
 
     # 캔버스에 출력할 이미지 작업
     paper = PhotoImage(width=width, height=height)  # 이미지 저장을 위한 초기화
     canvas.create_image((width/2, height/2), image=paper, state="normal")
 
-    rgbString = ""  # 이미지 데이터 변수(행/열)
+    rgbString = ""  #이미지 데이터 변수(행/열)
     rgbImage = img.convert("RGB")   # 전달 받은 이미지를 RGB 형식으로 변환
     for i in range(0, height):      # 행
         tmpString = ""  # 한 행의 픽셀들을 저장할 변수
-
         for j in range(0, width):   # 열
-            r, g, b = rgbImage.getpixel((j, i))          # 한점(픽셀)의 색상을 읽어와서 저장
-            tmpString += "#%02x%02x%02x " %(r, g, b)     # 옆으로 나열되는 애들은 꼭 띄어쓰기 추가해줘야 구분됨
-
-        rgbString += "{" + tmpString + "} "  # 행들을 결합 # 옆으로 나열되는 애들은 꼭 띄어쓰기 추가해줘야 구분됨
+            r, g, b = rgbImage.getpixel((j, i))      # 한점(픽셀)의 색상을 읽어와서 저장
+            tmpString += "#%02x%02x%02x " %(r, g, b) #1f2f37   # 옆으로 나열되는 애들은 꼭 띄어쓰기 추가해줘야 구분됨
+        #print(tmpString)
+        rgbString += "{" + tmpString + "} "  # 행들을 결합
+    #print(rgbString)
     paper.put(rgbString)    # 작업지에 이미지를 출력
     canvas.pack()
 
-def func_zoomin():                      # 확대/축소
+def func_zoomin(): # 확대/축소
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    # 확대 값을 대화상자로 입력
-    scale = askinteger("확대", "확대할 배율(2~4)을 입력하세요", minvalue=2, maxvalue=4)
-    photo2 = photo1.copy()  # 원본을 복사
+    #확대값을 대화상자로 입력
+    scale = askinteger("확대", "확대할 배율(2~4)을 입력하세요.",
+                       minvalue=2, maxvalue=4)
+    photo2 = photo1.copy() #원본을 복사
     photo2 = photo2.resize((int(oriX*scale), int(oriY*scale)))
-    newX = photo2.width     # 새로 변경된 크기의 이미지 사이즈 저장
+    newX = photo2.width #새로 변경된 크기의 이미지 사이즈 저장
     newY = photo2.height
     displayImage(photo2, newX, newY)
 
-def func_zoomout():                     # 확대/축소
+def func_zoomout(): # 확대/축소
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    # 축소 값을 대화상자로 입력
-    scale = askinteger("축소", "축소할 배율(2~4)을 입력하세요", minvalue=2, maxvalue=4)
+    scale = askinteger("확대", "확대할 배율(2~4)을 입력하세요.",
+                       minvalue=2, maxvalue=4)
     photo2 = photo1.copy()  # 원본을 복사
     photo2 = photo2.resize((int(oriX / scale), int(oriY / scale)))
     newX = photo2.width  # 새로 변경된 크기의 이미지 사이즈 저장
     newY = photo2.height
     displayImage(photo2, newX, newY)
-def func_mirror1():                     # 좌우/상하 뒤집기
-    global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
 
-def func_mirror2():                     # 좌우/상하 뒤집기
+def func_mirror1(): # 좌우/상하 뒤집기
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    photo2 = photo1.copy() #원본 복사
+    photo2 = photo2.transpose(Image.FLIP_TOP_BOTTOM)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
-def func_rotate():                      # 회전
+def func_mirror2(): # 좌우/상하 뒤집기
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = photo2.transpose(Image.FLIP_LEFT_RIGHT)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
+
+def func_rotate(): # 회전
+    global window, canvas, paper, photo1, photo2, oriX, oriY
+    #회전할 각도를 입력대화상자
+    degree = askinteger("회전", "회전할 각도(0~360)을 입력하세요?",
+                        minvalue=0, maxvalue=360)
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = photo2.rotate(degree, expand=True)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
 def func_bright():                      # 밝게
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    # 회전할 각도를 입력대화상자
+    value = askinteger("밝게", "값(1~10)을 입력하세요?",
+                        minvalue=0, maxvalue=10)
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = ImageEnhance.Brightness(photo2).enhance(value)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
 def func_dark():                        # 어둡게
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    # 회전할 각도를 입력대화상자
+    value = askfloat("어둡게", "값(0.0~1.0)을 입력하세요?",
+                       minvalue=0.0, maxvalue=1.0)
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = ImageEnhance.Brightness(photo2).enhance(value)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
 def func_blur():                        # 블러
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = photo2.filter(ImageFilter.BLUR)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
 def func_embo():                        # 엠보싱
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = photo2.filter(ImageFilter.EMBOSS)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
 def dunc_bw():                          # 흑백 이미지
     global window, canvas, paper, photo1, photo2, oriX, oriY
-    pass
+    photo2 = photo1.copy()  # 원본 복사
+    photo2 = ImageOps.grayscale(photo2)
+    newX = photo2.width
+    newY = photo2.height
+    displayImage(photo2, newX, newY)
 
 # 이미지 읽기 -> 픽셀단위로 저장(paper) -> 효과적용(canvas) 출력
 # 모든 효과는 원본(paper)로 작업 진행
@@ -165,7 +209,7 @@ mainMenu.add_cascade(label="이미지 처리(2)", menu=image2Menu)
 image2Menu.add_command(label="밝게", command=func_bright)
 image2Menu.add_command(label="어둡게", command=func_dark)
 image2Menu.add_separator()
-image2Menu.add_command(label="블러링", command=func_blur)
+image2Menu.add_command(label="블러", command=func_blur)
 image2Menu.add_command(label="엠보싱", command=func_embo)
 image2Menu.add_separator()
 image2Menu.add_command(label="흑백이미지", command=dunc_bw)
